@@ -1,5 +1,30 @@
 {
+  "name": "ha-dualflowventilation-card",
+  "version": "0.0.1",
+  "description": "Home Assistant Dual Flow Ventilation Card",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "build": "rollup -c --bundleConfigAsCjs"
+  },
+  "author": "Colin Gebski",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ColinGski/ha-dualflowventilation-card"
+  },
   "dependencies": {
     "lit": "^2.6.1"
+  },
+  "devDependencies": {
+    "@rollup/plugin-babel": "^6.0.3",
+    "@rollup/plugin-commonjs": "^24.0.1",
+    "@rollup/plugin-json": "^6.0.0",
+    "@rollup/plugin-node-resolve": "^15.0.1",
+    "@rollup/plugin-terser": "^0.4.0",
+    "@rollup/plugin-typescript": "^11.0.0",
+    "rollup": "^3.17.3",
+    "rollup-plugin-serve": "^2.0.2",
+    "tslib": "^2.5.0",
+    "typescript": "^4.9.5"
   }
 }
