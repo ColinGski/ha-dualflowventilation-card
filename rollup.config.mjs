@@ -33,7 +33,7 @@ const plugins = [
 
 export default [
     {
-        input: "src/ha-dualflowventilation-card.ts",
+        input: "src/dual-flow-ventilation-card.ts",
         output: {
             dir: "dist",
             format: "es",

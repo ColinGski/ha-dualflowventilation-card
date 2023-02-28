@@ -1,6 +1,6 @@
 {
     "name": "Dual Flow Ventilation Card",
-    "filename": "dfvc.js",
+    "filename": "ha-dualflowventilation-card.js",
     "homeassistant": "2022.11.0",
     "render_readme": true
 }
