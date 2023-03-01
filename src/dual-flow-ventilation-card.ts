@@ -34,6 +34,9 @@ export class DualFlowVentilationCard extends LitElement {
         const cellStateSensor = this.config.cell_state_entity
         const humiditySensor = this.config.humidity_entity;
         const speedSensor = this.config.fan_speed_entity;
+        const currentPresetSensor = this.config.current_preset_entity;
+
+        const currentPreset = this.printableValue(this.hass, currentPresetSensor, '');
 
         return html`<ha-card>
                 <div class="card-content">
@@ -99,11 +102,10 @@ export class DualFlowVentilationCard extends LitElement {
                             </div>
                         </div>
                     </div>
-                    <span style="display: none;">${ this.printableValue(this.hass, this.config.current_preset_entity, '')}</span>
                     <div class="dfvc-profiles">
-                        <button class="${ this.printableValue(this.hass, this.config.current_preset_entity, '') == "Away" ? 'selected' : '' }" @click=${(e) => this.setPresetMode('Away')}><ha-icon icon="mdi:fan"></ha-icon>Away</button>
-                        <button class="${ this.printableValue(this.hass, this.config.current_preset_entity, '') == "Home" ? 'selected' : '' }" @click=${(e) =>this.setPresetMode('Home')}><ha-icon icon="mdi:door-closed"></ha-icon>Home</button>
-                        <button class="${ this.printableValue(this.hass, this.config.current_preset_entity, '') == "Boost" ? 'selected' : '' }" @click=${(e) =>this.setPresetMode('Boost')}><ha-icon icon="mdi:flash"></ha-icon>Boost</button>
+                        <button class="${ currentPreset == "Away" ? 'selected' : '' }" @click=${(e) => this.setPresetMode('Away')}><ha-icon icon="mdi:fan"></ha-icon>Away</button>
+                        <button class="${ currentPreset == "Home" ? 'selected' : '' }" @click=${(e) =>this.setPresetMode('Home')}><ha-icon icon="mdi:door-closed"></ha-icon>Home</button>
+                        <button class="${ currentPreset == "Boost" ? 'selected' : '' }" @click=${(e) =>this.setPresetMode('Boost')}><ha-icon icon="mdi:flash"></ha-icon>Boost</button>
                     </div>
                 </div>
             </ha-card>`;
