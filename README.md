@@ -1,2 +1,4 @@
 # ha-dualflowventilation-card
 Dual Flow Ventilation Card for Home Assistant
+
+![Alt text](https://user-images.githubusercontent.com/27733198/222153831-7b508069-77a7-49d4-8bf2-24fa58cef3b2.png "screenshot")
