@@ -15,9 +15,16 @@ export class DualFlowVentilationCard extends LitElement {
         };
       }
 
-    private printableValue(hass, airSensor, unit : string) : string {
-        let state = hass.states[airSensor];
-        return (state ? `${state.state} ${unit}` : '-').trim();
+    private printableValue(airSensor) : string {
+        let state = this.hass.states[airSensor];
+        return (state ? (state.attributes.unit_of_measurement ? `${state.state} ${state.attributes.unit_of_measurement}` : state.state) : '-');
+    }
+
+    private renderTemperature(sensor, label) {
+        return html`<div>
+            <div class="dfvc-temp-label">${label}</div>
+            <div class="dfvc-temp-value">${this.printableValue(sensor)}</div>
+        </div>`;
     }
 
     public render() : TemplateResult {
@@ -26,30 +33,27 @@ export class DualFlowVentilationCard extends LitElement {
             return html``;
         }
 
-        const extractSensor = this.config.extract_air_entity;
-        const exhaustSensor = this.config.exhaust_air_entity;
-        const supplySensor = this.config.supply_air_entity;
-        const outdoorSensor = this.config.outdoor_air_entity;
-        const efficiencySensor = this.config.efficiency_entity;
-        const cellStateSensor = this.config.cell_state_entity
-        const humiditySensor = this.config.humidity_entity;
-        const speedSensor = this.config.fan_speed_entity;
-        const currentPresetSensor = this.config.current_preset_entity;
+        const currentPreset = this.hass.states[this.config.current_preset_entity].state;
 
-        const currentPreset = this.printableValue(this.hass, currentPresetSensor, '');
+        const presets = [
+            { preset: 'Away', icon: 'home-off-outline' },
+            { preset: 'Home', icon: 'home' },
+            { preset: 'Boost', icon: 'flash' }
+        ];
+
+        const entities = [
+            { entity: this.config.efficiency_entity, icon: 'gauge' },
+            { entity: this.config.cell_state_entity, icon: 'swap-horizontal-bold' },
+            { entity: this.config.humidity_entity, icon: 'water-percent' },
+            { entity: this.config.fan_speed_entity, icon: 'fan' },
+        ];
 
         return html`<ha-card>
                 <div class="card-content">
                     <div class="dfvc-temperatures">
                         <div class="dfvc-temperatures-left">
-                            <div class="dfvc-temperatures-extract">
-                                <div class="dfvc-temp-label">Air intérieur</div>
-                                <div class="dfvc-temp-value">${this.printableValue(this.hass, extractSensor, '°C')}</div>
-                            </div>
-                            <div class="dfvc-temperatures-supply">
-                                <div class="dfvc-temp-value">${this.printableValue(this.hass, supplySensor, '°C')}</div>
-                                <div class="dfvc-temp-label">Air neuf</div>
-                            </div>
+                            ${this.renderTemperature(this.config.extract_air_entity, 'Air intérieur')}
+                            ${this.renderTemperature(this.config.supply_air_entity, 'Air neuf')}
                         </div>
                         <div class="dfvc-temperatures-center">
                             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" width="50" height="50" viewBox="0 0 50 50" xml:space="preserve">
@@ -74,38 +78,19 @@ export class DualFlowVentilationCard extends LitElement {
                             </svg>
                         </div>
                         <div class="dfvc-temperatures-right">
-                            <div class="dfvc-temperatures-outdoor">
-                                <div class="dfvc-temp-label">Air extérieur</div>
-                                <div class="dfvc-temp-value">${this.printableValue(this.hass, outdoorSensor, '°C')}</div>
-                            </div>
-                            <div class="dfvc-temperatures-exhaust">
-                                <div class="dfvc-temp-value">${this.printableValue(this.hass, exhaustSensor, '°C')}</div>
-                                <div class="dfvc-temp-label">Air évacué</div>
-                            </div>
+                            ${this.renderTemperature(this.config.outdoor_air_entity, 'Air extérieur')}
+                            ${this.renderTemperature(this.config.exhaust_air_entity, 'Air évacué')}
                         </div>
                         <div class="dfvc-entities">
-                            <div class="dfvc-efficiency dfvc-entity">
-                                <div><ha-icon icon="mdi:gauge"></ha-icon></div>
-                                <div class="dfvc-value">${this.printableValue(this.hass, efficiencySensor, '%')}</div>
-                            </div>
-                            <div class="dfvc-cell-state dfvc-entity">
-                                <div><ha-icon icon="mdi:swap-horizontal-bold"></ha-icon></div>
-                                <div class="dfvc-value">${this.printableValue(this.hass, cellStateSensor, '')}</div>
-                            </div>
-                            <div class="dfvc-humidity dfvc-entity">
-                                <div><ha-icon icon="mdi:water-percent"></ha-icon></div>
-                                <div class="dfvc-value">${this.printableValue(this.hass, humiditySensor, '%')}</div>
-                            </div>
-                            <div class="dfvc-fan-speed dfvc-entity">
-                                <div><ha-icon icon="mdi:fan"></ha-icon></div>
-                                <div class="dfvc-value">${this.printableValue(this.hass, speedSensor, '%')}</div>
-                            </div>
+                            ${entities.map(i => html`
+                                <div class="dfvc-entity">
+                                    <div><ha-icon icon="mdi:${i.icon}"></ha-icon></div>
+                                    <div class="dfvc-value">${this.printableValue(i.entity)}</div>
+                                </div>`)}
                         </div>
                     </div>
                     <div class="dfvc-profiles">
-                        <button class="${ currentPreset == "Away" ? 'selected' : '' }" @click=${(e) => this.setPresetMode('Away')}><ha-icon icon="mdi:fan"></ha-icon>Away</button>
-                        <button class="${ currentPreset == "Home" ? 'selected' : '' }" @click=${(e) =>this.setPresetMode('Home')}><ha-icon icon="mdi:door-closed"></ha-icon>Home</button>
-                        <button class="${ currentPreset == "Boost" ? 'selected' : '' }" @click=${(e) =>this.setPresetMode('Boost')}><ha-icon icon="mdi:flash"></ha-icon>Boost</button>
+                        ${presets.map(i =>  html`<button class="${ currentPreset == i.preset ? 'selected' : '' }" @click=${() => this.setPresetMode(i.preset)}><ha-icon icon="mdi:${i.icon}"></ha-icon>${i.preset}</button>`)}
                     </div>
                 </div>
             </ha-card>`;
