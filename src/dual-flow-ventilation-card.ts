@@ -41,7 +41,7 @@ export class DualFlowVentilationCard extends LitElement {
         return html`
             <div>
                 <div class="dfvc-temp-label">${label}</div>
-                <div class="dfvc-temp-value" @click="${ e => this.showEntityInfo(sensor) }">${this.printableValue(sensor)}</div>
+                <div class="dfvc-temp-value" @click="${ () => this.showEntityInfo(sensor) }">${this.printableValue(sensor)}</div>
             </div>`;
     }
 
@@ -90,36 +90,53 @@ export class DualFlowVentilationCard extends LitElement {
         ];
 
         const entities = [
-            { entity: this.config.efficiency_entity, icon: 'gauge' },
-            { entity: this.config.cell_state_entity, icon: 'swap-horizontal-bold' },
+            //{ entity: this.config.efficiency_entity, icon: 'gauge' },
+            //{ entity: this.config.cell_state_entity, icon: 'swap-horizontal-bold' },
             { entity: this.config.humidity_entity, icon: 'water-percent' },
             { entity: this.config.fan_speed_entity, icon: 'fan' },
         ];
 
+        let cell_state_entity = this.config.cell_state_entity;
+        let efficiency_entity = this.config.efficiency_entity;
+
         return html`<ha-card>
                 <div class="card-content">
-                    <div class="dfvc-temperatures">
-                        <div class="dfvc-temperatures-left">
-                            ${this.renderTemperature(this.config.extract_air_entity, 'Air intérieur')}
-                            ${this.renderTemperature(this.config.supply_air_entity, 'Air neuf')}
-                        </div>
-                        <div class="dfvc-temperatures-center">
-                            ${this.renderExchangerState()}
-                        </div>
-                        <div class="dfvc-temperatures-right">
-                            ${this.renderTemperature(this.config.outdoor_air_entity, 'Air extérieur')}
-                            ${this.renderTemperature(this.config.exhaust_air_entity, 'Air évacué')}
+                    <div class="dfvc-control-panel">
+                        <div class="dfvc-overview">
+                            <div class="dfvc-temperatures">
+                                <div class="dfvc-temperatures-left">
+                                    ${this.renderTemperature(this.config.extract_air_entity, 'Extract Air')}
+                                    ${this.renderTemperature(this.config.supply_air_entity, 'Supply Air')}
+                                </div>
+                                <div class="dfvc-temperatures-center">
+                                    ${this.renderExchangerState()}
+                                </div>
+                                <div class="dfvc-temperatures-right">
+                                    ${this.renderTemperature(this.config.outdoor_air_entity, 'Outside Air')}
+                                    ${this.renderTemperature(this.config.exhaust_air_entity, 'Exhaust Air')}
+                                </div>
+                            </div>
+                            <div class="dfvc-cells-state">
+                                <span @click="${ () => this.showEntityInfo(cell_state_entity) }">
+                                    <ha-icon icon="mdi:swap-horizontal-bold"></ha-icon>
+                                    ${this.printableValue(cell_state_entity)} (Efficiency ${this.printableValue(efficiency_entity)})
+                                </span>
+                            </div>
                         </div>
                         <div class="dfvc-entities">
                             ${entities.map(i => html`
-                                <div class="dfvc-entity">
-                                    <div><ha-icon icon="mdi:${i.icon}"></ha-icon></div>
+                                <div class="dfvc-entity" @click="${ () => this.showEntityInfo(i.entity) }">
+                                    <div class="dfvc-icon"><ha-icon icon="mdi:${i.icon}"></ha-icon></div>
                                     <div class="dfvc-value">${this.printableValue(i.entity)}</div>
                                 </div>`)}
                         </div>
                     </div>
+                    
                     <div class="dfvc-profiles">
-                        ${presets.map(i =>  html`<button class="${ currentPreset == i.preset ? 'selected' : '' }" @click=${() => this.setPresetMode(i.preset)}><ha-icon icon="mdi:${i.icon}"></ha-icon>${i.preset}</button>`)}
+                        ${presets.map(i =>  html`
+                            <button class="${ currentPreset == i.preset ? 'selected' : '' }" 
+                                @click=${() => this.setPresetMode(i.preset)}><ha-icon icon="mdi:${i.icon}"></ha-icon>${i.preset}
+                            </button>`)}
                     </div>
                 </div>
             </ha-card>`;
@@ -146,16 +163,20 @@ export class DualFlowVentilationCard extends LitElement {
 
     static get styles() {
         return css`
-            .dfvc-temperatures {
+            .dfvc-control-panel {
                 display: grid;
-                grid-template-columns: auto 50px auto 35%;
-                align-items: center;
-                justify-items: center;
+                grid-template-columns: auto 30%;
                 border-radius: 12px;
                 border: medium none;
                 background-color: rgba(var(--rgb-primary-text-color), 0.05);
                 margin-bottom: 12px;
                 padding: 12px
+            }
+            .dfvc-temperatures {
+                display: grid;
+                grid-template-columns: auto 50px auto;
+                align-items: center;
+                justify-items: center;
             }
             .dfvc-temperatures > .dfvc-temperatures-left {
                 text-align: right;
@@ -166,10 +187,12 @@ export class DualFlowVentilationCard extends LitElement {
             .dfvc-temperatures > .dfvc-temperatures-center {
                 width: 50px;
                 height: 50px;
-            }                        
+            }        
+            .dfvc-cells-state {
+                text-align: center;
+            }            
             .dfvc-temperatures-left > div, .dfvc-temperatures-right > div {
-                padding-bottom: 10px;
-                padding-top: 10px;
+                padding: 10px;
             }
             .dfvc-temp-label {
                 color: var(--secondary-text-color);
@@ -179,18 +202,21 @@ export class DualFlowVentilationCard extends LitElement {
                 cursor: pointer;
             }
             .dfvc-entity {
-                margin-bottom: 3px;
-                display: grid;
-                grid-template-columns: 30px auto;
+                margin-bottom: 10px;
+                text-align: center;
+            }
+            .dfvc-entity .dfvc-icon {
+                color: var(--secondary-text-color);
+                margin-bottom: 5px;
             }
             .dfvc-entity .dfvc-value {
-                text-align: right;
-                align-self: center;
+                font-size: 150%;
+                cursor: pointer;
             }
             .dfvc-entities {
                 border-left: 1px solid #555;
                 padding-left: 20px;
-                justify-self: stretch;
+                align-self: center;
             }
             .dfvc-profiles {
                 display: flex;
@@ -205,6 +231,7 @@ export class DualFlowVentilationCard extends LitElement {
                 border-radius: 12px; /* Mushroom like */
                 border: medium none;
                 background-color: rgba(var(--rgb-primary-text-color), 0.05);
+                color: var(--primary-text-color);
                 transition: background-color 280ms ease-in-out 0s;
                 font-size: var(--control-height);
                 margin: 0px;
