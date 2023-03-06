@@ -1,9 +1,7 @@
 # Dual Flow Ventilation Card
 
 ![example workflow](https://github.com/ColinGski/ha-dualflowventilation-card/actions/workflows/build.yml/badge.svg)
-![example workflow](https://github.com/ColinGski/ha-dualflowventilation-card/actions/workflows/release.yml/badge.svg)
-
-[![release][release-badge]][release-url]
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/ColinGski/ha-dualflowventilation-card)
 
 Simple lovelace card for Home Assistant to display information related to a Dual Flow ventilation system.
 
