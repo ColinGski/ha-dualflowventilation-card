@@ -1,6 +1,7 @@
 import { LitElement, html, css, CSSResultGroup, TemplateResult } from "lit";
 import { customElement, } from "lit/decorators.js";
 import { DualFlowVentilationCardConfig } from "./dual-flow-ventilation-card-config";
+import { DualFlowVentilationCardEditor } from "./dual-flow-ventilation-card-editor";
   
 @customElement('dual-flow-ventilation-card')
 export class DualFlowVentilationCard extends LitElement {
@@ -14,6 +15,19 @@ export class DualFlowVentilationCard extends LitElement {
           config: {},
         };
       }
+
+    public static async getConfigElement() : Promise<DualFlowVentilationCardEditor> {
+        await import("./dual-flow-ventilation-card-editor");
+        return document.createElement('dual-flow-ventilation-card-editor') as DualFlowVentilationCardEditor;
+    }
+
+    /*
+    static getStubConfig() : Promise<DualFlowVentilationCardConfig> {
+        return 
+        { 
+        }
+    }
+    */
 
     private showEntityInfo(entity)
     {
